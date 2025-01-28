@@ -1,4 +1,5 @@
 from database.DB_connect import DBConnect
+from model.symptoms import Sintomo
 
 
 class DAO():
@@ -6,18 +7,18 @@ class DAO():
         pass
 
     @staticmethod
-    def getAllStates():
+    def getAllSymptoms():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select * from state s"""
+        query = """select * from symptom_severity ss """
 
         cursor.execute(query)
 
         for row in cursor:
-            result.append(Stato(**row))
+            result.append(Sintomo(**row))
 
         cursor.close()
         conn.close()

@@ -33,10 +33,8 @@ class View(ft.UserControl):
 
         #ROW with some controls
         # text field for the name
-        self.txt_anno = ft.TextField(
-            label="Anno",
-            width=200,
-        )
+        self.dd_sintomi = ft.Dropdown(label="sintomo")
+        self.controller.fillDD()
         self.txt_giorni = ft.TextField(
             label="xG",
             width=200,
