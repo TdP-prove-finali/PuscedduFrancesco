@@ -1,4 +1,5 @@
 from database.DB_connect import DBConnect
+from model.diseases import Malattia
 from model.symptoms import Sintomo
 
 
@@ -13,7 +14,9 @@ class DAO():
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select * from symptom_severity ss """
+        query = """select *
+                from symptom_severity ss 
+                order by ss.symptom asc """
 
         cursor.execute(query)
 
@@ -23,45 +26,43 @@ class DAO():
         cursor.close()
         conn.close()
         return result
-
     @staticmethod
-    def getNeighbours():
+    def getAllDiseases():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select *
-from neighbor n
-where n.state1 < n.state2 """
+        query = """select sd.Disease,sd.Description ,sp.step1 ,sp.step2 ,sp.step3 ,sp.step4 
+                from symptom_description sd , symptom_precaution sp 
+                where sd.Disease = sp.Disease """
 
         cursor.execute(query)
 
         for row in cursor:
-            result.append((row["state1"],row["state2"]))
+            result.append(Malattia(**row))
 
         cursor.close()
         conn.close()
         return result
+
     @staticmethod
-    def getPesi(anno,giorni):
+    def getNeighbours(sintomo):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select s1.state as s1,s2.state as s2,sum(abs(DATEDIFF(s1.`datetime`, s2.`datetime`))) as peso
-            from sighting s1,sighting s2
-            where year(s1.`datetime`) = year(s2.`datetime`) 
-            and year(s2.`datetime`) = %s
-            and abs(DATEDIFF(s1.`datetime`, s2.`datetime`)) <= %s
-            and s1.state < s2.state
-            group by s1.state,s2.state"""
+        query = """select t.prognosis as d1,t2.prognosis as d2
+                from testing t, testing t2
+                where t2.%s = t.%s 
+                and t2.%s = 1
+                and t2.prognosis < t.prognosis """
 
-        cursor.execute(query,(anno,giorni))
+        cursor.execute(query,(sintomo,sintomo,sintomo))
 
         for row in cursor:
-            result.append((row["s1"],row["s2"],row["peso"]))
+            result.append((row["d1"], row["d2"]))
 
         cursor.close()
         conn.close()

@@ -7,17 +7,33 @@ class Controller:
         self._view = view
         # the model, which implements the logic of the program and holds the data
         self._model = model
-    def handle_graph(self,e):
-        self._model.creaGrafo()
-        self._view.update_page()
-    """def fillDD(self):
-        for s in self._model.sintomi:
-            if r.datetime.year not in self._model.anni:
-                self._model.anni.append(r.datetime.year)
-            if r.shape not in self._model.forme:
-                self._model.forme.append(r.shape)
-        self._model.anni.sort()
-        for a in self._model.anni:
-            self._view.ddyear.options.append(ft.dropdown.Option(a))
-        for s in self._model.forme:
-            self._view.ddshape.options.append(ft.dropdown.Option(s))"""
+        self.selected_symptoms = []  # Lista per i sintomi selezionati
+        self.checkboxes = []  # Lista di checkbox
+
+    def populate_symptoms(self):
+        """Riempie il dropdown con i sintomi disponibili"""
+        symptoms = self._model.sintomi
+        self._model.creaMappaSintomi()
+        self._view.update_dropdown(symptoms)
+
+    def add_symptom(self, event):
+        """Aggiunge un sintomo alla lista selezionata"""
+        symptom = self._view.dropdown.value
+        if symptom and symptom not in self.selected_symptoms:
+            self.selected_symptoms.append(symptom)
+            self._view.update_selected_symptoms(self.selected_symptoms)
+
+            print(self._model.mappaSintomi[symptom])
+
+    def on_diagnose_click(self, event):
+        """Esegue la diagnosi in base ai sintomi selezionati"""
+        if not self.selected_symptoms:
+            self._view.create_alert("Seleziona almeno un sintomo!")
+            return
+
+        diagnosis = self.get_diagnosis(self.selected_symptoms)
+        self._view.update_results(diagnosis)
+
+    def get_diagnosis(self, symptoms):
+        """Restituisce una diagnosi in base ai sintomi selezionati"""
+        pass

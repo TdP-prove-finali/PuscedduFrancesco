@@ -4,65 +4,41 @@ import flet as ft
 class View(ft.UserControl):
     def __init__(self, page: ft.Page):
         super().__init__()
-        # page stuff
         self._page = page
-        self._page.title = "Template application using MVC and DAO"
-        self._page.horizontal_alignment = 'CENTER'
+        self._page.title = "Diagnostica Medica"
+        self._page.horizontal_alignment = ft.MainAxisAlignment.CENTER
         self._page.theme_mode = ft.ThemeMode.LIGHT
-        # controller (it is not initialized. Must be initialized in the main, after the controller is created)
+
         self._controller = None
-
-        # graphical elements
-        self._title = None
-        self.txt_name = None
-
-        self.btn_graph = None
-        self.btn_countedges = None
-        self.btn_search = None
-
-        self.txt_result = None
-        self.txt_result2 = None
-        self.txt_result3 = None
-
-        self.txt_container = None
+        self.selected_list = None
+        self.btn_diagnose = None
+        self.dropdown = None
 
     def load_interface(self):
-        # title
-        self._title = ft.Text("SCHELETRO ESAME", color="blue", size=24)
-        self._page.controls.append(self._title)
+        """Carica l'interfaccia grafica"""
+        self._title = ft.Text("Diagnostica Medica", color="blue", size=24)
 
-        #ROW with some controls
-        # text field for the name
-        self.dd_sintomi = ft.Dropdown(label="sintomo")
-        self.controller.fillDD()
-        self.txt_giorni = ft.TextField(
-            label="xG",
-            width=200,
-        )
-        self.txt_t1 = ft.TextField(
-            label="T1",
-            width=200,
-        )
-        self.txt_alfa = ft.TextField(
-            label="Alfa",
-            width=200,
-        )
-        self.btn_grafo = ft.ElevatedButton(text="Crea Grafo", on_click=self._controller.handle_graph)
-        row1 = ft.Row([self.txt_anno],
-                      alignment=ft.MainAxisAlignment.CENTER)
-        self._page.controls.append(row1)
-        row2 = ft.Row([self.txt_giorni,self.btn_grafo],
-                      alignment=ft.MainAxisAlignment.CENTER)
-        self._page.controls.append(row2)
-        row3 = ft.Row([self.txt_t1],
-                      alignment=ft.MainAxisAlignment.CENTER)
-        self._page.controls.append(row3)
+        # Dropdown per selezione sintomi
+        self.dropdown = ft.Dropdown(label="Cerca e seleziona sintomi", on_change=self._controller.add_symptom,
+                                    options=[])
 
-        # List View where the reply is printed
-        self.txt_result = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
-        self._page.controls.append(self.txt_result)
+        # Lista sintomi selezionati
+        self.selected_list = ft.ListView(expand=1, spacing=10, padding=10)
 
-        self._page.update()
+        # Bottone per avviare la diagnosi
+        self.btn_diagnose = ft.ElevatedButton(text="Diagnostica", on_click=self._controller.on_diagnose_click)
+
+        # Layout della UI
+        self._page.controls.extend([
+            ft.Container(content=self._title, alignment=ft.alignment.center),
+            ft.Container(content=self.dropdown, alignment=ft.alignment.center),
+            ft.Container(content=self.selected_list, alignment=ft.alignment.center),
+            ft.Container(content=self.btn_diagnose, alignment=ft.alignment.center),
+        ])
+
+        self._controller.populate_symptoms()
+        self.update_page()
+
     @property
     def controller(self):
         return self._controller
@@ -74,11 +50,38 @@ class View(ft.UserControl):
     def set_controller(self, controller):
         self._controller = controller
 
+    def update_dropdown(self, symptoms):
+        """Aggiorna la lista dei sintomi nel dropdown"""
+        for s in symptoms:
+            nome = s.__repr__()
+            self.dropdown.options.append(ft.dropdown.Option(text=nome, key=s))
+        self.update_page()
+
+    def update_selected_symptoms(self, selected_symptoms):
+        """Aggiorna la lista dei sintomi selezionati"""
+        self.selected_list.controls = [ft.Text(s) for s in selected_symptoms]
+        self.update_page()
+
+    def update_results(self, diagnosis_text):
+        """Aggiorna la lista dei risultati della diagnosi"""
+        self.selected_list.controls.append(ft.Text(f"🔎 Diagnosi: {diagnosis_text}", color="red"))
+        self.update_page()
+
     def create_alert(self, message):
-        dlg = ft.AlertDialog(title=ft.Text(message))
+        """Mostra un alert"""
+        dlg = ft.AlertDialog(
+            title=ft.Text("Attenzione"),
+            content=ft.Text(message),
+            actions=[ft.TextButton("OK", on_click=self.close_alert)],
+        )
         self._page.dialog = dlg
         dlg.open = True
-        self._page.update()
+        self.update_page()
 
+    def close_alert(self, event):
+        """Chiude l'alert dialog"""
+        self._page.dialog.open = False
+        self.update_page()
     def update_page(self):
+        """Aggiorna la UI"""
         self._page.update()
