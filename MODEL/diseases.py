@@ -11,5 +11,6 @@ class Malattia:
 
     def listaPrecauzioni(self):
         return [self.step1,self.step2,self.step3,self.step4]
-
+    def __repr__(self):
+        return f"{self.Disease}, {self.Description}"
 
