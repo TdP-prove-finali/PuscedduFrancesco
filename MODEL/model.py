@@ -7,29 +7,47 @@ class Model:
         self.sintomi = DAO.getAllSymptoms()
         self.malattie = DAO.getAllDiseases()
         self.diagnosi = None
+        self.archi = None
         self.mappaSintomi = {}
+        self.mappaMalattie = {}
         self.mappaMalattiaSintomi = {}
         self.grafo = nx.Graph()
     def creaMappaSintomi(self):
         for s in self.sintomi:
             self.mappaSintomi[s.__repr__()] = s
+    def creaMappaMalattie(self):
+        for m in self.malattie:
+            self.mappaMalattie[m.Disease] = m
+
     def creaMappaMalattiaSintomi(self):
         pass
 
-    def creaGrafo(self):
-        print(self.vicini)
-        self.archi = DAO.getPesi(anno,giorni)
-        print(list(self.archi))
-        for s in self.stati:
-            self.statiMap[s.id] = s
-            self.grafo.add_node(s.id)
-        for v in self.vicini:
-            self.grafo.add_edge(v[0],v[1])
+    def creaNodi(self):
+        for m in self.malattie:
+            self.grafo.add_node(m.Disease)
+
+    def aggiornaArchi(self,sintomoStr):
+        peso = self.mappaSintomi[sintomoStr].weight
+        sintomo = self.mappaSintomi[sintomoStr].symptom
+        self.archi = DAO.getEdges(sintomo)
+        print(self.archi[0])
+        if len(self.archi) == 1:
+            self.diagnosi = self.archi[0][0]
+            self.prognosi = self.mappaMalattie[self.diagnosi]
+            print(self.diagnosi)
+            print(self.prognosi)
+            return self.prognosi
         for a in self.archi:
-            if (a[0].upper(),a[1].upper()) in self.vicini or (a[1].upper(),a[0].upper()) in self.vicini:
-                self.grafo[a[0].upper()][a[1].upper()]["weight"] = a[2]
+            self.grafo.add_edge(a[0],a[1])
+            self.grafo[a[0]][a[1]]["weight"] = self.grafo[a[0]][a[1]].get("weight", 0) + peso
         print(self.grafo.number_of_edges())
         print(self.grafo.number_of_nodes())
+        return None
+
+    def diagnosis(self,malattia):
+        pass
+
+
 
 
 

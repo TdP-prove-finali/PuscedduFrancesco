@@ -47,19 +47,19 @@ class DAO():
         return result
 
     @staticmethod
-    def getNeighbours(sintomo):
+    def getEdges(sintomo):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select t.prognosis as d1,t2.prognosis as d2
+        query = f"""select t.prognosis as d1,t2.prognosis as d2
                 from testing t, testing t2
-                where t2.%s = t.%s 
-                and t2.%s = 1
-                and t2.prognosis < t.prognosis """
+                where t2.{sintomo} = t.{sintomo}
+                and t2.{sintomo} = 1
+                and t2.prognosis <= t.prognosis """
 
-        cursor.execute(query,(sintomo,sintomo,sintomo))
+        cursor.execute(query)
 
         for row in cursor:
             result.append((row["d1"], row["d2"]))
