@@ -17,26 +17,33 @@ class View(ft.UserControl):
     def load_interface(self):
         """Carica l'interfaccia grafica"""
         self._title = ft.Text("Diagnostica Medica", color="blue", size=24)
+        self._page.controls.append(self._title)
 
         # Dropdown per selezione sintomi
-        self.dropdown = ft.Dropdown(label="Cerca e seleziona sintomi", on_change=self._controller.add_symptom,
+        self.dropdown = ft.Dropdown(label="Cerca e seleziona sintomi", on_change=self.controller.add_symptom,
                                     options=[])
 
         # Lista sintomi selezionati
         self.selected_list = ft.ListView(expand=1, spacing=10, padding=10)
 
         # Bottone per avviare la diagnosi
-        self.btn_diagnose = ft.ElevatedButton(text="Diagnostica", on_click=self._controller.on_diagnose_click)
+        self.btn_diagnose = ft.ElevatedButton(text="Diagnostica", on_click=self.controller.on_diagnose_click)
+
+        # Bottone per azzerare i dati
+        self.azzera_button = ft.ElevatedButton(text="Azzera", on_click=self.controller.on_azzera_clicked)
+
+        # Prima riga del layout dopo il titolo
+        row1 = ft.Row(
+            [self.dropdown, self.btn_diagnose, self.azzera_button],  # Aggiungiamo gli elementi
+            alignment=ft.MainAxisAlignment.CENTER,  # Allineamento a sinistra (default)
+            spacing=10  # Spazio tra gli elementi
+        )
+        self._page.controls.append(row1)
 
         # Layout della UI
-        self._page.controls.extend([
-            ft.Container(content=self._title, alignment=ft.alignment.center),
-            ft.Container(content=self.dropdown, alignment=ft.alignment.center),
-            ft.Container(content=self.selected_list, alignment=ft.alignment.center),
-            ft.Container(content=self.btn_diagnose, alignment=ft.alignment.center),
-        ])
+        self._page.controls.append(ft.Container(content=self.selected_list, alignment=ft.alignment.center))
 
-        self._controller.populate_symptoms()
+        self.controller.populate_symptoms()
         self.update_page()
 
     @property

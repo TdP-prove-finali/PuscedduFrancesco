@@ -43,6 +43,10 @@ class Model:
         print(self.grafo.number_of_edges())
         print(self.grafo.number_of_nodes())
         return None
+    def azzeraModel(self):
+        self.diagnosi = None
+        self.archi = None
+        self.grafo.clear_edges()
 
     def diagnosis(self,malattia):
         pass

@@ -26,6 +26,8 @@ class Controller:
             self._view.update_selected_symptoms(self.selected_symptoms)
             self.disease = self._model.aggiornaArchi(symptom)
             if self.disease:
+                self._view.dropdown.disabled = True
+                self._view.btn_diagnose.disabled = True
                 self.output = "L'ultimo sintomo selezionato è presente solamente in una patologia, si tratta di: " + self.disease.__repr__()
                 self._view.update_results(self.output)
             print(symptom)
@@ -39,6 +41,13 @@ class Controller:
 
         diagnosis = self.get_diagnosis(self.selected_symptoms)
         self._view.update_results(diagnosis)
+    def on_azzera_clicked(self,e):
+        self._model.azzeraModel()
+        self._view.selected_list.controls.clear()
+        self.selected_symptoms.clear()
+        self._view.dropdown.disabled = False
+        self._view.btn_diagnose.disabled = False
+        self._view.update_page()
 
     def get_diagnosis(self, symptoms):
         """Restituisce una diagnosi in base ai sintomi selezionati"""
