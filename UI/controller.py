@@ -13,10 +13,11 @@ class Controller:
     def populate_symptoms(self):
         """Riempie il dropdown con i sintomi disponibili"""
         symptoms = self._model.sintomi
-        self._model.creaMappaSintomi()
-        self._model.creaNodi()
-        self._model.creaMappaMalattie()
-        self._view.update_dropdown(symptoms)
+        utenti = self._model.utenti
+        #self._model.creaMappaSintomi()
+        #self._model.creaNodi()
+        #self._model.creaMappaMalattie()
+        self._view.update_dropdown(utenti)
 
     def add_symptom(self, event):
         """Aggiunge un sintomo alla lista selezionata"""
@@ -25,13 +26,13 @@ class Controller:
             self.selected_symptoms.append(symptom)
             self._view.update_selected_symptoms(self.selected_symptoms)
             self.disease = self._model.aggiornaArchi(symptom)
-            if self.disease:
-                self._view.dropdown.disabled = True
-                self._view.btn_diagnose.disabled = True
-                self.output = "L'ultimo sintomo selezionato è presente solamente in una patologia, si tratta di: " + self.disease.__repr__()
-                self._view.update_results(self.output)
+            #if self.disease:
+               # self._view.dropdown.disabled = True
+              #  self._view.btn_diagnose.disabled = True
+             #   self.output = "L'ultimo sintomo selezionato è presente solamente in una patologia, si tratta di: " + self.disease.__repr__()
+            #    self._view.update_results(self.output)
             print(symptom)
-            print(self._model.mappaSintomi[symptom].symptom)
+            #print(self._model.mappaSintomi[symptom].symptom)
 
     def on_diagnose_click(self, event):
         """Esegue la diagnosi in base ai sintomi selezionati"""

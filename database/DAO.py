@@ -1,6 +1,7 @@
 from database.DB_connect import DBConnect
 from model.diseases import Malattia
 from model.symptoms import Sintomo
+from model.utenti import Utente
 
 
 class DAO():
@@ -63,6 +64,28 @@ class DAO():
 
         for row in cursor:
             result.append((row["d1"], row["d2"]))
+
+        cursor.close()
+        conn.close()
+        return result
+    @staticmethod
+    def getUtenti():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """select * 
+                from social_media_entertainment_data smed """
+
+        cursor.execute(query)
+
+        # Social Media Fatigue level, tech savviness level, sleep quality, social isolation feeling
+        # Are all classified on a scale from 1 to 10 --> (scale 1-10)#
+        for row in cursor:
+            u = Utente(**row)
+            result.append(u)
+            print(u.User_ID)
 
         cursor.close()
         conn.close()

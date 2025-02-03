@@ -61,7 +61,7 @@ class View(ft.UserControl):
         """Aggiorna la lista dei sintomi nel dropdown"""
         for s in symptoms:
             nome = s.__repr__()
-            self.dropdown.options.append(ft.dropdown.Option(text=nome, key=s))
+            self.dropdown.options.append(ft.dropdown.Option(text=nome, key=s.User_ID))
         self.update_page()
 
     def update_selected_symptoms(self, selected_symptoms):
