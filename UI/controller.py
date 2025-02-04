@@ -34,14 +34,27 @@ class Controller:
             print(symptom)
             #print(self._model.mappaSintomi[symptom].symptom)
 
-    def on_diagnose_click(self, event):
+    def analyze_click(self, event):
         """Esegue la diagnosi in base ai sintomi selezionati"""
-        if not self.selected_symptoms:
-            self._view.create_alert("Seleziona almeno un sintomo!")
-            return
+        anni = self._view.ddAge.value
+        genere = self._view.ddGender.value
+        paese = self._view.ddCountry.value
+        tempoSocial = self._view.ddSocialTime.value
+        piattaforma = self._view.ddPlatform.value
+        livelloIsolamento = self._view.ddIsolationLevel.value
+        interazionePubblicitaria = self._view.ddAdInteraction.value
+        self._model.importaUtenti(anni,genere,paese,tempoSocial,piattaforma,livelloIsolamento,interazionePubblicitaria)
+        listaOre=[]
+        for u in self._model.utenti:
+            listaOre.append(u.Physical_activity_Hours)
+            #self._view.result_list.controls.append(ft.Text(u.User_ID))
+        avg = self._model.calcola_media(listaOre)
+        self._view.result_list.controls.append(ft.Text(f"Gli utenti di questo cluster in media si esercitano {avg:.2f} ore al giorno"))
+        self._view.update_page()
 
-        diagnosis = self.get_diagnosis(self.selected_symptoms)
-        self._view.update_results(diagnosis)
+        """diagnosis = self.get_diagnosis(self.selected_symptoms)
+        self._view.update_results(diagnosis)"""
+
     def on_azzera_clicked(self,e):
         self._model.azzeraModel()
         self._view.selected_list.controls.clear()

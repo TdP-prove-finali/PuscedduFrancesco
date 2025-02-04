@@ -69,16 +69,14 @@ class DAO():
         conn.close()
         return result
     @staticmethod
-    def getUtenti():
+    def getUtenti(query,params):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select * 
-                from social_media_entertainment_data smed """
 
-        cursor.execute(query)
+        cursor.execute(query,params)
 
         # Social Media Fatigue level, tech savviness level, sleep quality, social isolation feeling
         # Are all classified on a scale from 1 to 10 --> (scale 1-10)#
