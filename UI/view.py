@@ -128,6 +128,20 @@ class View(ft.UserControl):
         )
         self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
 
+        # Pulsante per eseguire cancellare la view
+        self.btn_delete = ft.ElevatedButton(
+            text="Analizza", on_click=self.controller.delete_click
+        )
+        self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
+
+        # Pulsante per resettare gli utenti
+        self.btn_reset = ft.ElevatedButton(
+            text="Analizza", on_click=self.controller.reset_click
+        )
+        self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
+
+
+
         # ListView per mostrare i risultati
         self.result_list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
         self._page.controls.append(self.result_list)

@@ -54,6 +54,10 @@ class Controller:
 
         """diagnosis = self.get_diagnosis(self.selected_symptoms)
         self._view.update_results(diagnosis)"""
+    def delete_click(self):
+        pass
+    def reset_click(self):
+        pass
 
     def on_azzera_clicked(self,e):
         self._model.azzeraModel()
