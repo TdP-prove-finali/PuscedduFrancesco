@@ -13,33 +13,20 @@ class View(ft.UserControl):
         self._controller = None
         self.selected_list = None
         self.btn_analyze = None
-        self.ddAge = None
         self.ddGender = None
-        self.ddCountry = None
-        self.ddSocialTime = None
+        self.ddScreenTime = None
         self.ddPlatform = None
         self.ddIsolationLevel = None
         self.ddAdInteraction = None
+        self.ddSleepQuality = None
         self.result_list = None
+        self.lookFor = None
 
     def load_interface(self):
         self._title = ft.Text("Interazioni Social", color="blue", size=24)
         self._page.controls.append(ft.Container(content=self._title, alignment=ft.alignment.center))
 
         # Dropdown per i filtri
-        self.ddAge = ft.Dropdown(
-            label="Fascia d'età",
-            value=None,
-            options=[
-                ft.dropdown.Option(None, "Non specificata"),
-                ft.dropdown.Option("1","<18"),
-                ft.dropdown.Option("2","18-25"),
-                ft.dropdown.Option("3","26-35"),
-                ft.dropdown.Option("4","36-50"),
-                ft.dropdown.Option("5","50+")
-            ]
-        )
-
         self.ddGender = ft.Dropdown(
             label="Genere",
             value=None,
@@ -50,22 +37,8 @@ class View(ft.UserControl):
                 ft.dropdown.Option("Other", "Altro")
             ]
         )
-
-        self.ddCountry = ft.Dropdown(
-            label="Paese",
-            value=None,
-            options=[
-                ft.dropdown.Option(None, "Non specificato"),
-                ft.dropdown.Option("USA"),
-                ft.dropdown.Option("India"),
-                ft.dropdown.Option("Germany"),
-                ft.dropdown.Option("UK"),
-                ft.dropdown.Option("France")
-            ]
-        )
-
-        self.ddSocialTime = ft.Dropdown(
-            label="Tempo sui social",
+        self.ddScreenTime = ft.Dropdown(
+            label="Tempo giornaliero allo schermo",
             value=None,
             options=[
                 ft.dropdown.Option(None, "Non specificato"),
@@ -75,32 +48,35 @@ class View(ft.UserControl):
                 ft.dropdown.Option("4","6+h")
             ]
         )
-
         self.ddPlatform = ft.Dropdown(
             label="Piattaforma preferita",
-            value=None,
+            value="",
+            #on_change= self.change_btn,
             options=[
-                ft.dropdown.Option(None, "Non specificata"),
+                ft.dropdown.Option("", "Non specificata"),
                 ft.dropdown.Option("TikTok"),
                 ft.dropdown.Option("YouTube"),
                 ft.dropdown.Option("Instagram"),
                 ft.dropdown.Option("Facebook")
             ]
         )
-
         self.ddIsolationLevel = ft.Dropdown(
-            label="Livello di isolamento sociale",
+            label="Livello isolamento sociale",
             value=None,
-            disabled=True,
             options=[ft.dropdown.Option(None, "Non specificato")] + [ft.dropdown.Option(str(i)) for i in range(1, 11)]
         )
+        self.ddSleepQuality = ft.Dropdown(
+            label="Qualità del sonno",
+            value=None,
+            options=[ft.dropdown.Option(None, "Non specificata")] + [ft.dropdown.Option(str(i)) for i in range(1, 11)]
 
+        )
         self.ddAdInteraction = ft.Dropdown(
             label="Interazione con gli annunci",
             value=None,
             options=[
                 ft.dropdown.Option(None, "Non specificata"),
-                ft.dropdown.Option("", "Bassa"),
+                ft.dropdown.Option("Low", "Bassa"),
                 ft.dropdown.Option("Medium", "Media"),
                 ft.dropdown.Option("High", "Alta")
             ]
@@ -108,7 +84,7 @@ class View(ft.UserControl):
 
         # Prima riga del layout dopo il titolo
         row1 = ft.Row(
-            [self.ddAge, self.ddGender, self.ddCountry],  # Aggiungiamo gli elementi
+            [self.ddGender, self.ddPlatform,self.ddSleepQuality],  # Aggiungiamo gli elementi
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10  # Spazio tra gli elementi
         )
@@ -116,7 +92,7 @@ class View(ft.UserControl):
 
         # Seconda riga del layout
         row2 = ft.Row(
-            [self.ddPlatform, self.ddSocialTime, self.ddAdInteraction,], # self.ddIsolationLevel
+            [self.ddScreenTime, self.ddAdInteraction, self.ddIsolationLevel], # self.ddIsolationLevel
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10
         )
@@ -124,23 +100,32 @@ class View(ft.UserControl):
 
         # Pulsante per eseguire l'analisi
         self.btn_analyze = ft.ElevatedButton(
-            text="Analizza", on_click=self.controller.analyze_click
+            text="Analizza dati", on_click=self.controller.analyze_click, color="green"
         )
-        self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
 
         # Pulsante per eseguire cancellare la view
         self.btn_delete = ft.ElevatedButton(
-            text="Analizza", on_click=self.controller.delete_click
+            text="Cancella lista", on_click=self.controller.delete_click, color="red"
         )
-        self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
 
         # Pulsante per resettare gli utenti
         self.btn_reset = ft.ElevatedButton(
-            text="Analizza", on_click=self.controller.reset_click
+            text="Resetta filtri", on_click=self.controller.reset_click, color="blue"
         )
-        self._page.controls.append(ft.Container(content=self.btn_analyze, alignment=ft.alignment.center))
+
+        # Pulsante per iniziare la ricorsione
+        self.btn_lookFor = ft.ElevatedButton(
+            text="Cerca Tester", on_click=self.controller.trovaTester, color="white"
+        )
 
 
+        # Terza riga (riga dei bottoni)
+        row2 = ft.Row(
+            [self.btn_analyze, self.btn_reset, self.btn_delete, self.btn_lookFor],  # self.ddIsolationLevel
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=10
+        )
+        self._page.controls.append(row2)
 
         # ListView per mostrare i risultati
         self.result_list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
@@ -160,23 +145,19 @@ class View(ft.UserControl):
     def set_controller(self, controller):
         self._controller = controller
 
-    def update_dropdown(self, symptoms):
-        """Aggiorna la lista dei sintomi nel dropdown"""
-        for s in symptoms:
-            if s.country not in self.countries:
-                self.countries.append(s.country)
-                #self.dropdown.options.append(ft.dropdown.Option(s.User_ID))
-        self.update_page()
+    def change_btn(self,e):
+        selected_platform = self.ddPlatform.value
 
-    def update_selected_symptoms(self, selected_symptoms):
-        """Aggiorna la lista dei sintomi selezionati"""
-        self.selected_list.controls = [ft.Text(s) for s in selected_symptoms]
-        self.update_page()
+        # Se selezioni "Non specificata", lascia il testo base e disabilita il pulsante
+        if selected_platform is None:
+            self.btn_lookFor.text = "Cerca Tester"
+            self.btn_lookFor.disabled = True
+        else:
+            self.btn_lookFor.text = f"Cerca Tester per {selected_platform}"
+            self.btn_lookFor.disabled = False
 
-    def update_results(self, diagnosis_text):
-        """Aggiorna la lista dei risultati della diagnosi"""
-        self.selected_list.controls.append(ft.Text(f"🔎 Diagnosi: {diagnosis_text}", color="red"))
-        self.update_page()
+        self.update_page()  # Aggiorna la UI"""
+
 
     def create_alert(self, message):
         """Mostra un alert"""
@@ -197,33 +178,3 @@ class View(ft.UserControl):
         """Aggiorna la UI"""
         self._page.update()
 
-"""      Carica l'interfaccia grafica
-        self._title = ft.Text("Diagnostica Medica", color="blue", size=24)
-        self._page.controls.append(self._title)
-
-        # Dropdown per selezione sintomi
-        self.dropdown = ft.Dropdown(label="Cerca e seleziona sintomi", on_change=self.controller.add_symptom,
-                                    options=[])
-
-        # Lista sintomi selezionati
-        self.selected_list = ft.ListView(expand=1, spacing=10, padding=10)
-
-        # Bottone per avviare la diagnosi
-        self.btn_diagnose = ft.ElevatedButton(text="Diagnostica", on_click=self.controller.on_diagnose_click)
-
-        # Bottone per azzerare i dati
-        self.azzera_button = ft.ElevatedButton(text="Azzera", on_click=self.controller.on_azzera_clicked)
-
-        # Prima riga del layout dopo il titolo
-        row1 = ft.Row(
-            [self.dropdown, self.btn_diagnose, self.azzera_button],  # Aggiungiamo gli elementi
-            alignment=ft.MainAxisAlignment.CENTER,  # Allineamento a sinistra (default)
-            spacing=10  # Spazio tra gli elementi
-        )
-        self._page.controls.append(row1)
-
-        # Layout della UI
-        self._page.controls.append(ft.Container(content=self.selected_list, alignment=ft.alignment.center))
-
-        self.controller.populate_symptoms()
-        self.update_page()"""

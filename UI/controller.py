@@ -1,3 +1,7 @@
+import heapq
+import time
+from collections import Counter
+
 import flet as ft
 
 
@@ -7,66 +11,111 @@ class Controller:
         self._view = view
         # the model, which implements the logic of the program and holds the data
         self._model = model
-        self.selected_symptoms = []  # Lista per i sintomi selezionati
-        self.checkboxes = []  # Lista di checkbox
+        # valori dei dd
+        self.genere = None
+        self.tempoSchermi = None
+        self.piattaforma = None
+        self.livelloIsolamento = None
+        self.interazionePubblicitaria = None
+        self.qualitaSonno = None
 
-    def populate_symptoms(self):
-        """Riempie il dropdown con i sintomi disponibili"""
-        symptoms = self._model.sintomi
-        utenti = self._model.utenti
-        #self._model.creaMappaSintomi()
-        #self._model.creaNodi()
-        #self._model.creaMappaMalattie()
-        self._view.update_dropdown(utenti)
-
-    def add_symptom(self, event):
-        """Aggiunge un sintomo alla lista selezionata"""
-        symptom = self._view.dropdown.value
-        if symptom and symptom not in self.selected_symptoms:
-            self.selected_symptoms.append(symptom)
-            self._view.update_selected_symptoms(self.selected_symptoms)
-            self.disease = self._model.aggiornaArchi(symptom)
-            #if self.disease:
-               # self._view.dropdown.disabled = True
-              #  self._view.btn_diagnose.disabled = True
-             #   self.output = "L'ultimo sintomo selezionato è presente solamente in una patologia, si tratta di: " + self.disease.__repr__()
-            #    self._view.update_results(self.output)
-            print(symptom)
-            #print(self._model.mappaSintomi[symptom].symptom)
 
     def analyze_click(self, event):
-        """Esegue la diagnosi in base ai sintomi selezionati"""
-        anni = self._view.ddAge.value
-        genere = self._view.ddGender.value
-        paese = self._view.ddCountry.value
-        tempoSocial = self._view.ddSocialTime.value
-        piattaforma = self._view.ddPlatform.value
-        livelloIsolamento = self._view.ddIsolationLevel.value
-        interazionePubblicitaria = self._view.ddAdInteraction.value
-        self._model.importaUtenti(anni,genere,paese,tempoSocial,piattaforma,livelloIsolamento,interazionePubblicitaria)
-        listaOre=[]
+        ddl = [self._view.ddGender.value,self._view.ddScreenTime.value,self._view.ddPlatform.value,
+               self._view.ddIsolationLevel.value,self._view.ddAdInteraction.value,self._view.ddSleepQuality.value]
+        conto = 0
+        for v in ddl:
+            if v == "" or v is None or "Non specificat" in v:
+                conto += 1
+            if conto > 3:
+                self._view.create_alert("Seleziona almeno 3 valori di filtraggio perfavore.\n"
+                                        "Il database è troppo grosso!")
+                return
+        self.genere = ddl[0]
+        self.tempoSchermi = ddl[1]
+        self.piattaforma = ddl[2]
+        self.livelloIsolamento = ddl[3]
+        self.interazionePubblicitaria = ddl[4]
+        self.qualitaSonno = ddl[5]
+        self._view.ddGender.disabled = True
+        self._view.ddScreenTime.disabled = True
+        self._view.ddPlatform.disabled = True
+        self._view.ddAdInteraction.disabled = True
+        self._view.ddIsolationLevel.disabled = True
+        self._view.ddSleepQuality.disabled = True
+        t = time.time()
+        self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
+        s = time.time()
+        print("tempo importazione utenti: " + str(s-t))
+        self._view.result_list.controls.append(ft.Text(f"Importazione utenti effettuata correttamente!\n"
+                                                       f"importati: {len(self._model.utenti)} utenti"))
+        #self.attivitaFisica()
+        self._view.update_page()
+    def attivitaFisica(self):
+        listaOre = []
+        listaOreSocial = []
         for u in self._model.utenti:
             listaOre.append(u.Physical_activity_Hours)
-            #self._view.result_list.controls.append(ft.Text(u.User_ID))
+            #listaOreSocial.append(u.Daily_Social_Media_Hours)
+            # self._view.result_list.controls.append(ft.Text(u.User_ID))
+        contatore = Counter(listaOre)
+        print(contatore)
+        lutenti = self._model.utenti
+        for numero, conteggio in sorted(contatore.items(), key=lambda x: x[1], reverse=True):
+            percent = conteggio / len(lutenti) * 100
+            self._view.result_list.controls.append(ft.Text(f"Si allenano per {numero} ore --> {percent:.2f}% degli utenti"))
         avg = self._model.calcola_media(listaOre)
-        self._view.result_list.controls.append(ft.Text(f"Gli utenti di questo cluster in media si esercitano {avg:.2f} ore al giorno"))
+        self._view.result_list.controls.append(
+            ft.Text(f"Gli utenti di questo cluster in media si esercitano {avg:.2f} ore al giorno"))
         self._view.update_page()
 
-        """diagnosis = self.get_diagnosis(self.selected_symptoms)
-        self._view.update_results(diagnosis)"""
-    def delete_click(self):
-        pass
-    def reset_click(self):
-        pass
+    def trovaTester(self,e):
+        if not self._view.ddPlatform.disabled:
+            self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+        if self._view.ddPlatform.value == "Non specificata" or self._view.ddPlatform.value == "":
+            self._view.create_alert("Inserire una piattaforma tramite il dropdown!")
+            return
+        nodi, archi, list = self._model.cercaTester()
+        provider = self._view.ddPlatform.value
+        self._view.result_list.controls.append(ft.Text(f"nodi: {nodi}\n"
+                                                       f"archi: {archi}\n"
+                                                       f"Lista tester per {provider}"))
+        n = 0
+        for l in list:
+            i = self._model.mappaUtenti[l]
+            n += 1
+            self._view.result_list.controls.append(ft.Text(f"{n}) ID: {i.User_ID} --> {i.Daily_Social_Media_Hours}"))
+            self._view.result_list.controls.append(ft.Text(f"  '--> età: {i.age}; paese: {i.country}; occupazione: {i.occupation}; salario: {i.Monthly_Income_USD}"))
 
-    def on_azzera_clicked(self,e):
-        self._model.azzeraModel()
-        self._view.selected_list.controls.clear()
-        self.selected_symptoms.clear()
-        self._view.dropdown.disabled = False
-        self._view.btn_diagnose.disabled = False
+
         self._view.update_page()
 
-    def get_diagnosis(self, symptoms):
-        """Restituisce una diagnosi in base ai sintomi selezionati"""
-        pass
+
+    def delete_click(self,e):
+        self._view.result_list.controls.clear()
+        self._view.update_page()
+    def reset_click(self,e):
+        self._model.utenti = []
+        self._model.grafo.clear()
+        print(self._view.ddPlatform.value + "bbb")
+        if self._view.ddGender:
+            self._view.ddGender.value = None
+            self._view.ddGender.disabled = False
+        if self._view.ddScreenTime:
+            self._view.ddScreenTime.value = None
+            self._view.ddScreenTime.disabled = False
+        if self._view.ddPlatform != "":
+            self._view.ddPlatform.value = ""
+            self._view.ddPlatform.disabled = False
+        if self._view.ddIsolationLevel:
+            self._view.ddIsolationLevel.value = None
+            self._view.ddIsolationLevel.disabled = False
+        if self._view.ddAdInteraction:
+            self._view.ddAdInteraction.value = None
+            self._view.ddAdInteraction.disabled = False
+        if self._view.ddSleepQuality:
+            self._view.ddSleepQuality.value = None
+            self._view.ddSleepQuality.disabled = False
+        self._view.update_page()
+
+
