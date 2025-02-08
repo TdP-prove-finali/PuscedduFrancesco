@@ -13,6 +13,7 @@ class Model:
         self.grafo = nx.Graph()
         self.percorso = []
         self.bestSol = None
+        self.maxScore = -1
 
     def importaUtenti(self, gender=None, social_time=None, platform=None,
                       isolation_level=None, ad_interaction=None, sleep_quality=None):
@@ -72,7 +73,7 @@ class Model:
         nodes = list(self.mappaUtenti.keys())
         self.grafo = nx.complete_graph(nodes)
         print(len(nodes))
-        oreMax = 0
+        """        oreMax = 0
         for i in range(len(nodes)):
             print(i)
             for j in range(i + 1, len(nodes)):  # Evita di ripetere coppie già viste
@@ -85,7 +86,7 @@ class Model:
                     self.nodoGrosso = u1
                 self.grafo[u1][u2]["weight"] = weight
         s = time.time()
-        print("tempo creazione archi: " + str(s-t))
+        print("tempo creazione archi: " + str(s-t))"""
 
     # Un provider di servizi (twitter, facebook ecc...) vuole introdurre nuove features
     # e quindi trovare una decina di persone adeguate al testing e quindi:
@@ -94,40 +95,38 @@ class Model:
     # Ad esempio Salario, occupazione, età, paese #
     def cercaTester(self):
         self.creaGrafo()
-        nodi_ordinati = sorted(self.mappaUtenti.keys(),
-                               key=lambda u: self.mappaUtenti[u].Daily_Social_Media_Hours,
-                               reverse=True)
+        nodi_ordinati = list(self.mappaUtenti.keys())
         self.ricorsione([], nodi_ordinati, 0)  # Partiamo con diversità = 0
         return self.grafo.number_of_nodes(), self.grafo.number_of_edges(), self.bestSol
 
     def ricorsione(self, parziale, nodiRimasti, diversityScore):
-        maxScore = -1
-        nodi = copy.deepcopy(nodiRimasti)
+        print(parziale)
+        print("---------------------------------------")
+        if len(parziale) == 3:  # Se abbiamo raggiunto il numero massimo di nodi
+            if diversityScore > self.maxScore:  # Aggiorna solo se il punteggio è migliore
+                self.bestSol = list(parziale)  # Copia la soluzione
+                self.bestScore = diversityScore
+            return  # Termina la funzione
 
-        for u in nodiRimasti:
+        for i, u in enumerate(nodiRimasti):
+            # Assicura ordine crescente per evitare duplicati e massimizzare le ore sul social media
+            if parziale:
+                t1 = self.mappaUtenti[u].Daily_Social_Media_Hours
+                t2 = self.mappaUtenti[parziale[-1]].Daily_Social_Media_Hours
+                if t2 < t1:
+                    continue
             parziale.append(u)
-            nodi.remove(u)
             # Calcoliamo solo il contributo aggiuntivo di u
             newScore = self.aggiornaScore(parziale,diversityScore, u)
-            if newScore > maxScore:
-                maxScore = newScore
-                self.bestSol = parziale
-                if len(parziale) == 10:
-                    print(parziale)
-                    print(newScore)
-                    print("---------------------------------------")
-                    return parziale
             # Ricorsione con il nuovo score già aggiornato
-            self.ricorsione(parziale, nodi, newScore)
+            self.ricorsione(parziale, nodiRimasti[i+1:], newScore)
             parziale.pop()
-        print("->->->->->->->->->->->->->->->->->->FIIIIIINEEEEEEE CIIIIIICLOOOOOOOO<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-")
-
 
     def aggiornaScore(self, utenti, punteggio, last):
         #----------------------------------------------------------------------------------------
         # Opzione 1: indicizziamo anche le ore del social e le facciamo pesare nel punteggio
         # In questo modo è come se una diversità valesse 1h in più sul social
-        # punteggio = punteggio + self.mappaUtenti[last].Daily_Social_Media_Hours
+        punteggio = punteggio + self.mappaUtenti[last].Daily_Social_Media_Hours
         #----------------------------------------------------------------------------------------
         # Opzione 2: il punteggio indica solo la diversità e non tutto un complessivo punteggio
         # comprensivo anche delle ore passate sul social
@@ -146,7 +145,6 @@ class Model:
         # Inoltre tiene conto anche del fatto che se la differenza tra i valori è molta sarà un po più di 1
         # viceversa se la differenza è poca sarà più vicinp allo 0, infatti se è uguale sarà 0
         # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
-        # Spoiler alert --> mi sento fortissimo dopo sta trovata
         #-------------------------------------------------------------------------------------------------------------------------------
         # faccio la differenza in valore assoluto dei due valori
         diff = abs(v1-v2)
