@@ -8,9 +8,9 @@ class View(ft.UserControl):
         self._page.title = "Diagnostica Medica"
         self._page.horizontal_alignment = ft.MainAxisAlignment.CENTER
         self._page.theme_mode = ft.ThemeMode.LIGHT
-        self.countries = []
-
+        self.image_display = ft.Image()
         self._controller = None
+
         self.selected_list = None
         self.btn_analyze = None
         self.ddGender = None
@@ -25,6 +25,7 @@ class View(ft.UserControl):
     def load_interface(self):
         self._title = ft.Text("Interazioni Social", color="blue", size=24)
         self._page.controls.append(ft.Container(content=self._title, alignment=ft.alignment.center))
+
 
         # Dropdown per i filtri
         self.ddGender = ft.Dropdown(
@@ -115,17 +116,38 @@ class View(ft.UserControl):
 
         # Pulsante per iniziare la ricorsione
         self.btn_lookFor = ft.ElevatedButton(
-            text="Cerca Tester", on_click=self.controller.trovaTester, color="white"
+            text="Cerca Tester", on_click=self.controller.trovaTester, color="orange"
         )
 
 
         # Terza riga (riga dei bottoni)
-        row2 = ft.Row(
+        row3 = ft.Row(
             [self.btn_analyze, self.btn_reset, self.btn_delete, self.btn_lookFor],  # self.ddIsolationLevel
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10
         )
-        self._page.controls.append(row2)
+        self._page.controls.append(row3)
+
+        # bottoni per le analisi e i grafici
+        self.btn_percentuali = ft.ElevatedButton(
+            text="Percentuale Impegni", data="train", on_click=self.controller.percentage_click
+        )
+        self.btn_statistiche = ft.ElevatedButton(
+            text="avg-min-max-devstd", data="work", on_click=self.controller.stats_click
+        )
+        self.btn_read = ft.ElevatedButton(
+            text="Visualizza Lettura", data="read"#, on_click=self.update_chart
+        )
+
+        # Quarta riga (seconda riga dei bottoni)
+        row4 = ft.Row(
+            [self.btn_percentuali, self.btn_statistiche, self.btn_read],
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=10
+        )
+
+        self._page.controls.append(row4)
+
 
         # ListView per mostrare i risultati
         self.result_list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
@@ -158,6 +180,13 @@ class View(ft.UserControl):
 
         self.update_page()  # Aggiorna la UI"""
 
+
+    """def update_chart(self, e):
+        activity = e.control.data
+        img_data = self.controller.generate_chart(activity)
+        self._page.controls.append(ft.Container(content=self.image_display, alignment=ft.alignment.center))
+        self.image_display.src_base64 = img_data
+        self.update_page()"""
 
     def create_alert(self, message):
         """Mostra un alert"""

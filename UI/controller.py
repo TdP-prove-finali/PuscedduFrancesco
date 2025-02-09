@@ -1,6 +1,9 @@
+import base64
 import heapq
 import time
+import matplotlib.pyplot as plt
 from collections import Counter
+from io import BytesIO
 
 import flet as ft
 
@@ -85,11 +88,8 @@ class Controller:
             i = self._model.mappaUtenti[l]
             n += 1
             self._view.result_list.controls.append(ft.Text(f"{n}) ID: {i.User_ID} --> {i.Daily_Social_Media_Hours}"))
-            self._view.result_list.controls.append(ft.Text(f"  '--> età: {i.age}; paese: {i.country}; occupazione: {i.occupation}; salario: {i.Monthly_Income_USD}"))
-
-
+            self._view.result_list.controls.append(ft.Text(f"   '--> età: {i.age}; paese: {i.country}; occupazione: {i.occupation}; salario: {i.Monthly_Income_USD}"))
         self._view.update_page()
-
 
     def delete_click(self,e):
         self._view.result_list.controls.clear()
@@ -117,5 +117,47 @@ class Controller:
             self._view.ddSleepQuality.value = None
             self._view.ddSleepQuality.disabled = False
         self._view.update_page()
+
+    def percentage_click(self,e):
+        self._model.percentuali()
+        n = 1
+        self._view.result_list.controls.append(ft.Text(f"Tempo giornaliero in percentuale degli utenti"))
+        for u in self._model.mappaPercentuali.keys():
+            a,b,c = self._model.mappaPercentuali[u]
+            self._view.result_list.controls.append(ft.Text(f"{n}) ID: {u} --> Allenamento: {a:.2f}%, Lavoro/Studio: {b:.2f}%, Sonno: {c:.2f}%"))
+            n +=1
+        self._view.update_page()
+
+
+    def stats_click(self,e):
+        self._view.result_list.controls.append(ft.Text(f"Statistiche degli utenti"))
+        paAvg, paMax, paMin, paDevStd, wsAvg, wsMax, wsMin, wsDevStd, sAvg, sMax, sMin, sDevStd = self._model.statistiche()
+        self._view.result_list.controls.append(ft.Text(f"Attività fisica:\n"
+                                                       f"media: {paAvg:.2f}, massimo: {paMax:.2f}, minimo: {paMin:.2f}, deviazione standard: {paDevStd:.2f}"))
+        self._view.result_list.controls.append(ft.Text(f"Lavoro/Studio:\n"
+                                                       f"media: {wsAvg:.2f}, massimo: {wsMax:.2f}, minimo: {wsMin:.2f}, deviazione standard: {wsDevStd:.2f}"))
+        self._view.result_list.controls.append(ft.Text(f"Sonno:\n"
+                                                       f"media: {sAvg:.2f}, massimo: {sMax:.2f}, minimo: {sMin:.2f}, deviazione standard: {sDevStd:.2f}"))
+        self._view.update_page()
+
+
+        """    def generate_chart(self, activity):
+             data = self._model.get_activity_data(activity)
+             names = list(data.keys())
+             values = list(data.values())
+
+             plt.figure(figsize=(7, 3))
+             plt.scatter(names, values, color="blue", s=0)  # Grafico a punti
+             plt.xlabel("Persone")
+             plt.ylabel("Ore spese")
+             plt.title(f"Ore spese in {activity}")
+
+             # Convertire il grafico in immagine base64
+             img = BytesIO()
+             plt.savefig(img, format="png")
+             img.seek(0)
+             plt.close()
+
+             return base64.b64encode(img.getvalue()).decode()"""
 
 

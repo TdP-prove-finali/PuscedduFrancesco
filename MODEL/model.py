@@ -1,4 +1,5 @@
 import copy
+import statistics
 import time
 
 from database.DAO import DAO
@@ -14,6 +15,7 @@ class Model:
         self.percorso = []
         self.bestSol = None
         self.maxScore = -1
+        self.mappaPercentuali = {}
 
     def importaUtenti(self, gender=None, social_time=None, platform=None,
                       isolation_level=None, ad_interaction=None, sleep_quality=None):
@@ -73,7 +75,7 @@ class Model:
         nodes = list(self.mappaUtenti.keys())
         self.grafo = nx.complete_graph(nodes)
         print(len(nodes))
-        """        oreMax = 0
+        """oreMax = 0
         for i in range(len(nodes)):
             print(i)
             for j in range(i + 1, len(nodes)):  # Evita di ripetere coppie già viste
@@ -104,8 +106,8 @@ class Model:
         print("---------------------------------------")
         if len(parziale) == 3:  # Se abbiamo raggiunto il numero massimo di nodi
             if diversityScore > self.maxScore:  # Aggiorna solo se il punteggio è migliore
-                self.bestSol = list(parziale)  # Copia la soluzione
-                self.bestScore = diversityScore
+                self.bestSol = list(parziale)
+                self.maxScore = diversityScore
             return  # Termina la funzione
 
         for i, u in enumerate(nodiRimasti):
@@ -130,7 +132,7 @@ class Model:
         #----------------------------------------------------------------------------------------
         # Opzione 2: il punteggio indica solo la diversità e non tutto un complessivo punteggio
         # comprensivo anche delle ore passate sul social
-        # le orre passate sul social verranno considerate solo attraverso la selezione nella ricorsione
+        # le ore passate sul social verranno considerate solo attraverso la selezione nella ricorsione
         #----------------------------------------------------------------------------------------
         for u in utenti:
             if self.mappaUtenti[u].country != self.mappaUtenti[last].country:
@@ -154,9 +156,34 @@ class Model:
         return diff/avg
         # casi estremi: sono uguali --> diff = 0 ==> indice = 0
         # sono uno il doppio dell'altro --> diff = avg ==> indice = 1
-
+    def percentuali(self):
+        for u in self.utenti:
+            a = u.Physical_activity_Hours*100/24
+            b = u.Work_or_Study_Hours*100/24
+            c = u.Average_Sleep_Hours*100/24
+            self.mappaPercentuali[u.User_ID] = (a,b,c)
+    def statistiche(self):
+        lpa = []
+        lws = []
+        ls = []
+        for u in self.utenti:
+            lpa.append(u.Physical_activity_Hours)
+            lws.append(u.Work_or_Study_Hours)
+            ls.append(u.Average_Sleep_Hours)
+        paAvg, paMax, paMin, paDevStd = self.calcola_media(lpa),max(lpa),min(lpa),statistics.stdev(lpa)
+        wsAvg, wsMax, wsMin, wsDevStd = self.calcola_media(lws),max(lws),min(lws),statistics.stdev(lws)
+        sAvg, sMax, sMin, sDevStd = self.calcola_media(ls),max(ls),min(ls),statistics.stdev(ls)
+        return paAvg, paMax, paMin, paDevStd, wsAvg, wsMax, wsMin, wsDevStd, sAvg, sMax, sMin, sDevStd
     def calcola_media(self,lista):
         return sum(lista) / len(lista) if lista else 0  # Evita divisioni per zero
+
+    """def get_activity_data(self, activity):
+        if activity == "train":
+            return {u.User_ID: u.Physical_activity_Hours for u in self.utenti}
+        if activity == "work":
+            return {u.User_ID: u.Work_or_Study_Hours for u in self.utenti}
+        if activity == "read":
+            return {u.User_ID: u.Reading_Hours for u in self.utenti}"""
 
 
 

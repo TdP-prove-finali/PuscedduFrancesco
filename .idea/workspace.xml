@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="commit 8/02, ricorsione in corso...">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MODEL/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/MODEL/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,14 +40,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.main.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/kecco/PROGETTO_TESI"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/kecco/PROGETTO_TESI&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PROGETTO_TESI" />
@@ -219,7 +222,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739021554538</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="commit 8/02, ricorsione in corso...">
+      <option name="closed" value="true" />
+      <created>1739035319640</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1739035319640</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
