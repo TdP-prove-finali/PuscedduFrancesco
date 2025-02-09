@@ -141,6 +141,7 @@ class Controller:
         self._view.update_page()
 
 
+
         """    def generate_chart(self, activity):
              data = self._model.get_activity_data(activity)
              names = list(data.keys())
