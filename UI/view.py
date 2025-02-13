@@ -58,7 +58,8 @@ class View(ft.UserControl):
                 ft.dropdown.Option("TikTok"),
                 ft.dropdown.Option("YouTube"),
                 ft.dropdown.Option("Instagram"),
-                ft.dropdown.Option("Facebook")
+                ft.dropdown.Option("Facebook"),
+                ft.dropdown.Option("Twitter")
             ]
         )
         self.ddIsolationLevel = ft.Dropdown(

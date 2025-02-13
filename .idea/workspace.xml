@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="commit 8/02, ricorsione in corso...">
+    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="commit 9/02, ricorsione(?), statistiche create!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MODEL/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/MODEL/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -230,7 +228,23 @@
       <option name="project" value="LOCAL" />
       <updated>1739035319640</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="commit 8/02, ricorsione in corso...">
+      <option name="closed" value="true" />
+      <created>1739118549621</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1739118549621</updated>
+    </task>
+    <task id="LOCAL-00020" summary="commit 9/02, ricorsione(?), statistiche create!">
+      <option name="closed" value="true" />
+      <created>1739118606361</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1739118606361</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -248,6 +262,7 @@
     <MESSAGE value="attempt 1" />
     <MESSAGE value="first commit" />
     <MESSAGE value="commit 8/02, ricorsione in corso..." />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 8/02, ricorsione in corso..." />
+    <MESSAGE value="commit 9/02, ricorsione(?), statistiche create!" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 9/02, ricorsione(?), statistiche create!" />
   </component>
 </project>
