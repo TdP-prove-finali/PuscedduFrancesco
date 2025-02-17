@@ -1,4 +1,3 @@
-import copy
 import statistics
 import time
 
@@ -10,12 +9,15 @@ class Model:
     def __init__(self):
         self.utenti = None
         self.mappaUtenti = {}
-        self.nodoGrosso = None
-        self.grafo = nx.Graph()
-        self.percorso = []
-        self.bestSol = None
+        self.livelli = {}
+        self.grafo = nx.DiGraph()
+        self.bestSol = []
         self.maxScore = -1
-        self.mappaPercentuali = {}
+        self.mappaPercentualiEd = {}
+        self.mappaPercentualiFd = {}
+        self.mappaPercentualiSi = {}
+        self.mappaPercentualiEp = {}
+
 
     def importaUtenti(self, gender=None, social_time=None, platform=None,
                       isolation_level=None, ad_interaction=None, sleep_quality=None):
@@ -66,29 +68,48 @@ class Model:
             query += " WHERE " + " AND ".join(filters)
 
         self.utenti = DAO.getUtenti(query, params)
-        self.creaMappa()
-    def creaMappa(self):
+        self.creaMappe()
+        nodi = self.grafo.number_of_nodes()
+        archi = self.grafo.number_of_edges()
+        return nodi, archi
+    def creaMappe(self):
         for u in self.utenti:
+            # Dizionario per raggruppare TUTTI gli utenti
             self.mappaUtenti[u.User_ID] = u
+            # Dizionario per raggruppare utenti per livello
+            if u.Subscription_Platforms == 0:  # Escludo gli utenti non iscritti alla piattaforma
+                continue
+
+            livello = u.Social_Media_Platforms_Used
+
+            if livello not in self.livelli:
+                self.livelli[livello] = []
+            self.livelli[livello].append(u.User_ID)
+
+        if len(self.utenti) < 30:
+            self.creaGrafoPiccolo()
+        else:
+            self.creaGrafo()
+
+    def creaGrafoPiccolo(self):
+        nodes = list(self.mappaUtenti.keys())
+        self.grafo = nx.complete_graph(nodes, create_using=nx.Graph())
+        print(self.grafo.number_of_edges())
     def creaGrafo(self):
         t = time.time()
         nodes = list(self.mappaUtenti.keys())
-        self.grafo = nx.complete_graph(nodes)
-        print(len(nodes))
-        """oreMax = 0
-        for i in range(len(nodes)):
-            print(i)
-            for j in range(i + 1, len(nodes)):  # Evita di ripetere coppie già viste
-                u1, u2 = nodes[i], nodes[j]
-                tu1 = self.mappaUtenti[u1].Daily_Social_Media_Hours
-                tu2 = self.mappaUtenti[u2].Daily_Social_Media_Hours
-                weight = (tu1 + tu2) / 2  # Calcolo del peso (media)
-                if weight > oreMax:
-                    oreMax = weight
-                    self.nodoGrosso = u1
-                self.grafo[u1][u2]["weight"] = weight
+        self.grafo.add_nodes_from(nodes)
+        # Connessioni solo tra livelli adiacenti
+        livelli_ordinati = sorted(self.livelli.keys())
+        for i in range(len(livelli_ordinati) - 1):  # Iteriamo solo fino al penultimo livello
+            livello_attuale = livelli_ordinati[i]
+            livello_successivo = livelli_ordinati[i + 1]
+            for u1 in self.livelli[livello_attuale]:
+                for u2 in self.livelli[livello_successivo]:
+                    self.grafo.add_edge(u1, u2)  # Collegamento tra livelli adiacenti
+                    print(u1,u2)
         s = time.time()
-        print("tempo creazione archi: " + str(s-t))"""
+        print("tempo creazione archi: " + str(s-t))
 
     # Un provider di servizi (twitter, facebook ecc...) vuole introdurre nuove features
     # e quindi trovare una decina di persone adeguate al testing e quindi:
@@ -96,43 +117,53 @@ class Model:
     # diversifica il più possibile le caratteristiche di queste persone
     # Ad esempio Salario, occupazione, età, paese #
     def cercaTester(self):
-        self.creaGrafo()
-        nodi_ordinati = list(self.mappaUtenti.keys())
-        self.ricorsione([], nodi_ordinati, 0)  # Partiamo con diversità = 0
+        if len(self.utenti) < 30:
+            for nodo in self.mappaUtenti.keys():
+                self.ricorsione([nodo], nodo,[nodo],0)
+        else:
+            for nodo in self.livelli[1]:  # Partiamo dai nodi del livello 1
+                self.ricorsione([nodo], nodo, [nodo], 0)  # Ogni chiamata ha una lista separata
         return self.grafo.number_of_nodes(), self.grafo.number_of_edges(), self.bestSol
 
-    def ricorsione(self, parziale, nodiRimasti, diversityScore):
-        print(parziale)
-        print("---------------------------------------")
-        if len(parziale) == 3:  # Se abbiamo raggiunto il numero massimo di nodi
+    def ricorsione(self, parziale, nodoAttuale, nodiVisitati, diversityScore):
+        #(parziale)
+        #print("---------------------------------------")
+
+        if len(parziale) == 5:  # Se abbiamo raggiunto il numero massimo di nodi
             if diversityScore > self.maxScore:  # Aggiorna solo se il punteggio è migliore
                 self.bestSol = list(parziale)
                 self.maxScore = diversityScore
+                print(self.bestSol)
+                print(f"score: + {self.maxScore:.2f}")
+                print("---------------------------------------")
             return  # Termina la funzione
 
-        for i, u in enumerate(nodiRimasti):
+        vicini = list(self.grafo.neighbors(nodoAttuale))  # Nodi adiacenti al nodo attuale
+        nodiViciniBuoni = [n for n in vicini if n not in nodiVisitati]  # Lista normale
+
+        for nodo in nodiViciniBuoni:
             # Assicura ordine crescente per evitare duplicati e massimizzare le ore sul social media
-            if parziale:
-                t1 = self.mappaUtenti[u].Daily_Social_Media_Hours
-                t2 = self.mappaUtenti[parziale[-1]].Daily_Social_Media_Hours
-                if t2 < t1:
-                    continue
-            parziale.append(u)
-            # Calcoliamo solo il contributo aggiuntivo di u
-            newScore = self.aggiornaScore(parziale,diversityScore, u)
+            t1 = self.mappaUtenti[nodo].Daily_Social_Media_Hours
+            t2 = self.mappaUtenti[parziale[-1]].Daily_Social_Media_Hours
+            if t2 > t1:  # Mantiene ordine corretto
+                continue
+            parziale.append(nodo)
+            nodiVisitati.append(nodo)
+
+            # Calcoliamo solo il contributo aggiuntivo di nodo
+            newScore = self.aggiornaScore(parziale, diversityScore, nodo)
+
             # Ricorsione con il nuovo score già aggiornato
-            self.ricorsione(parziale, nodiRimasti[i+1:], newScore)
+            self.ricorsione(parziale, nodo, nodiVisitati[:], newScore)  # Passiamo una copia di nodiVisitati
+
             parziale.pop()
+            nodiVisitati.pop()
 
     def aggiornaScore(self, utenti, punteggio, last):
         #----------------------------------------------------------------------------------------
-        # Opzione 1: indicizziamo anche le ore del social e le facciamo pesare nel punteggio
+        # Indicizzo anche le ore del social e le facciamo pesare nel punteggio
         # In questo modo è come se una diversità valesse 1h in più sul social
         punteggio = punteggio + self.mappaUtenti[last].Daily_Social_Media_Hours
-        #----------------------------------------------------------------------------------------
-        # Opzione 2: il punteggio indica solo la diversità e non tutto un complessivo punteggio
-        # comprensivo anche delle ore passate sul social
-        # le ore passate sul social verranno considerate solo attraverso la selezione nella ricorsione
         #----------------------------------------------------------------------------------------
         for u in utenti:
             if self.mappaUtenti[u].country != self.mappaUtenti[last].country:
@@ -146,7 +177,6 @@ class Model:
         # Mi sono inventato questa funzione per avere un indice il più vicino possibile ad 1
         # Inoltre tiene conto anche del fatto che se la differenza tra i valori è molta sarà un po più di 1
         # viceversa se la differenza è poca sarà più vicinp allo 0, infatti se è uguale sarà 0
-        # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
         #-------------------------------------------------------------------------------------------------------------------------------
         # faccio la differenza in valore assoluto dei due valori
         diff = abs(v1-v2)
@@ -156,34 +186,110 @@ class Model:
         return diff/avg
         # casi estremi: sono uguali --> diff = 0 ==> indice = 0
         # sono uno il doppio dell'altro --> diff = avg ==> indice = 1
-    def percentuali(self):
+
+    # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
+
+    def calcola_equilibrio_digitale(self):
+        equilibrio_digitale = {}
+
+        # Calcolo indice e percentuali giornaliere
         for u in self.utenti:
-            a = u.Physical_activity_Hours*100/24
-            b = u.Work_or_Study_Hours*100/24
-            c = u.Average_Sleep_Hours*100/24
-            self.mappaPercentuali[u.User_ID] = (a,b,c)
-    def statistiche(self):
-        lpa = []
-        lws = []
-        ls = []
+            # Percentuali sul totale di 24 ore
+            a = (u.Physical_activity_Hours * 100) / 24  # Attività fisica
+            b = (u.Work_or_Study_Hours * 100) / 24  # Lavoro/studio
+            c = (u.Average_Sleep_Hours * 100) / 24  # Sonno
+            d = (u.Screen_Hours * 100) / 24  # Tempo davanti a uno schermo
+
+            # Memorizziamo le percentuali per l'utente
+            self.mappaPercentualiEd[u.User_ID] = (a, b, c, d)
+
+            # Calcolo dell'indice di equilibrio digitale
+            score = (u.Physical_activity_Hours +
+                     u.Average_Sleep_Hours -
+                     u.Work_or_Study_Hours -
+                     u.Screen_Hours)
+
+            equilibrio_digitale[u.User_ID] = score
+
+        # Ordiniamo gli utenti in base all'Indice di Equilibrio Digitale
+        risultati_top10 = sorted(equilibrio_digitale.items(), key=lambda x: x[1], reverse=True)[:10]
+        risultati_bottom10 = sorted(equilibrio_digitale.items(), key=lambda x: x[1])[:10]
+
+        return risultati_top10, risultati_bottom10
+
+    def calcola_fatica_digitale(self):
+        fatica_digitale = {}
+
+        # Calcolo indice e percentuali giornaliere
         for u in self.utenti:
-            lpa.append(u.Physical_activity_Hours)
-            lws.append(u.Work_or_Study_Hours)
-            ls.append(u.Average_Sleep_Hours)
-        paAvg, paMax, paMin, paDevStd = self.calcola_media(lpa),max(lpa),min(lpa),statistics.stdev(lpa)
-        wsAvg, wsMax, wsMin, wsDevStd = self.calcola_media(lws),max(lws),min(lws),statistics.stdev(lws)
-        sAvg, sMax, sMin, sDevStd = self.calcola_media(ls),max(ls),min(ls),statistics.stdev(ls)
-        return paAvg, paMax, paMin, paDevStd, wsAvg, wsMax, wsMin, wsDevStd, sAvg, sMax, sMin, sDevStd
+            a = u.Notifications_Received_Daily
+            b = u.Hours_Spent_in_Online_Communities # Ore in community rispetto a 24h
+            c = u.Social_Media_Fatigue_Level
+            d = u.Sleep_Quality
+
+            # Memorizziamo le percentuali per l'utente
+            self.mappaPercentualiFd[u.User_ID] = (a, b, c, d)
+
+            # Calcolo dell'indice di fatica digitale
+            score = (a * b/24 + c - d)
+
+            fatica_digitale[u.User_ID] = score
+
+        # Ordiniamo gli utenti per punteggio di fatica digitale
+        utenti_top10 = sorted(fatica_digitale.items(), key=lambda x: x[1], reverse=True)[:10]
+        utenti_bottom10 = sorted(fatica_digitale.items(), key=lambda x: x[1])[:10]
+
+        return utenti_top10, utenti_bottom10
+
+    def calcola_spesa_intrattenimento(self):
+        spesa_intrattenimento = {}
+
+        # Calcolo indice e percentuali giornaliere
+        for u in self.utenti:
+            a = u.Monthly_Expenditure_on_Entertainment_USD
+            b = u.Subscription_Platforms  # Normalizziamo considerando un massimo di 10 piattaforme
+            if b == 0:  # Escludo utenti non iscritti a piattaforme
+                continue
+            # Memorizziamo le percentuali per l'utente
+            self.mappaPercentualiSi[u.User_ID] = (a, b, u.Preferred_Entertainment_Platform)
+
+            # Calcolo dell'indice di spesa per l’intrattenimento
+            score = (a/500 * b) # Normalizziamo su un massimo di 500$
+
+            spesa_intrattenimento[u.User_ID] = score
+
+        # Ordiniamo gli utenti per punteggio di spesa sull’intrattenimento
+        utenti_top10 = sorted(spesa_intrattenimento.items(), key=lambda x: x[1], reverse=True)[:10]
+        utenti_bottom10 = sorted(spesa_intrattenimento.items(), key=lambda x: x[1])[:10]
+
+        return utenti_top10, utenti_bottom10
+
+    def calcola_esposizione_ads(self):
+        esposizione_ads = {}
+
+        # Calcolo indice e salvataggio dati reali
+        for u in self.utenti:
+            a = u.Ad_Interaction_Count  # Numero puro
+            b = u.Screen_Hours  # Ore
+            c = u.Notifications_Received_Daily  # Numero puro
+
+            # Memorizziamo i valori per l'utente
+            self.mappaPercentualiEp[u.User_ID] = (a,b,c)
+
+            # Calcolo dell'indice di esposizione agli ads
+            score = (a + c) * b/24
+
+            esposizione_ads[u.User_ID] = score
+
+        # Ordiniamo gli utenti per punteggio di esposizione agli ads
+        utenti_top10 = sorted(esposizione_ads.items(), key=lambda x: x[1], reverse=True)[:10]
+        utenti_bottom10 = sorted(esposizione_ads.items(), key=lambda x: x[1])[:10]
+
+        return utenti_top10, utenti_bottom10
+
     def calcola_media(self,lista):
         return sum(lista) / len(lista) if lista else 0  # Evita divisioni per zero
 
-    """def get_activity_data(self, activity):
-        if activity == "train":
-            return {u.User_ID: u.Physical_activity_Hours for u in self.utenti}
-        if activity == "work":
-            return {u.User_ID: u.Work_or_Study_Hours for u in self.utenti}
-        if activity == "read":
-            return {u.User_ID: u.Reading_Hours for u in self.utenti}"""
 
 
 

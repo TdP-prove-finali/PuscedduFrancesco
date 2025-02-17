@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="commit 9/02, ricorsione(?), statistiche create!">
+    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="commit 13/02, ricorsione(?), statistiche create!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MODEL/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/MODEL/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -38,14 +40,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/kecco/PROGETTO_TESI&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/kecco/PROGETTO_TESI"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PROGETTO_TESI" />
@@ -244,7 +246,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739118606361</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="commit 13/02, ricorsione(?), statistiche create!">
+      <option name="closed" value="true" />
+      <created>1739462346462</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1739462346463</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -263,6 +273,7 @@
     <MESSAGE value="first commit" />
     <MESSAGE value="commit 8/02, ricorsione in corso..." />
     <MESSAGE value="commit 9/02, ricorsione(?), statistiche create!" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 9/02, ricorsione(?), statistiche create!" />
+    <MESSAGE value="commit 13/02, ricorsione(?), statistiche create!" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 13/02, ricorsione(?), statistiche create!" />
   </component>
 </project>

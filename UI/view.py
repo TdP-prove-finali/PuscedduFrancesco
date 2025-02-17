@@ -102,7 +102,7 @@ class View(ft.UserControl):
 
         # Pulsante per eseguire l'analisi
         self.btn_analyze = ft.ElevatedButton(
-            text="Analizza dati", on_click=self.controller.analyze_click, color="green"
+            text="Analizza dati e crea Grafo", on_click=self.controller.analyze_click, color="green"
         )
 
         # Pulsante per eseguire cancellare la view
@@ -130,19 +130,21 @@ class View(ft.UserControl):
         self._page.controls.append(row3)
 
         # bottoni per le analisi e i grafici
-        self.btn_percentuali = ft.ElevatedButton(
-            text="Percentuale Impegni", data="train", on_click=self.controller.percentage_click
+        self.btn_BenDig = ft.ElevatedButton(
+            text="Benessere Digitale", on_click=self.controller.benessereDigitale_click
         )
-        self.btn_statistiche = ft.ElevatedButton(
-            text="avg-min-max-devstd", data="work", on_click=self.controller.stats_click
+        self.btn_FatDig = ft.ElevatedButton(
+            text="Fatica Digitale", on_click=self.controller.faticaDigitale_click
         )
-        self.btn_read = ft.ElevatedButton(
-            text="Visualizza Lettura", data="read"#, on_click=self.update_chart
+        self.btn_SpesaIntr = ft.ElevatedButton(
+            text="Spesa Intrattenimento", on_click=self.controller.spesaIntrattenimento_click
         )
-
+        self.btn_ExpAds = ft.ElevatedButton(
+            text="Esposizione agli ads", on_click=self.controller.esposizioneAds_click
+        )
         # Quarta riga (seconda riga dei bottoni)
         row4 = ft.Row(
-            [self.btn_percentuali, self.btn_statistiche, self.btn_read],
+            [self.btn_BenDig, self.btn_FatDig, self.btn_SpesaIntr,self.btn_ExpAds],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10
         )

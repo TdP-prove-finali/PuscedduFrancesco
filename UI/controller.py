@@ -1,9 +1,4 @@
-import base64
-import heapq
 import time
-import matplotlib.pyplot as plt
-from collections import Counter
-from io import BytesIO
 
 import flet as ft
 
@@ -21,68 +16,67 @@ class Controller:
         self.livelloIsolamento = None
         self.interazionePubblicitaria = None
         self.qualitaSonno = None
+        self.ddl = []
 
 
     def analyze_click(self, event):
-        ddl = [self._view.ddGender.value,self._view.ddScreenTime.value,self._view.ddPlatform.value,
+        self.ddl = [self._view.ddGender.value,self._view.ddScreenTime.value,self._view.ddPlatform.value,
                self._view.ddIsolationLevel.value,self._view.ddAdInteraction.value,self._view.ddSleepQuality.value]
         conto = 0
-        for v in ddl:
+        for v in self.ddl:
             if v == "" or v is None or "Non specificat" in v:
                 conto += 1
-            if conto > 3:
-                self._view.create_alert("Seleziona almeno 3 valori di filtraggio perfavore.\n"
-                                        "Il database è troppo grosso!")
+            if conto > 4:
+                self._view.create_alert("Selezionare almeno 2 valori di filtraggio perfavore")
                 return
-        self.genere = ddl[0]
-        self.tempoSchermi = ddl[1]
-        self.piattaforma = ddl[2]
-        self.livelloIsolamento = ddl[3]
-        self.interazionePubblicitaria = ddl[4]
-        self.qualitaSonno = ddl[5]
+        self.genere = self.ddl[0]
+        self.tempoSchermi = self.ddl[1]
+        self.piattaforma = self.ddl[2]
+        self.livelloIsolamento = self.ddl[3]
+        self.interazionePubblicitaria = self.ddl[4]
+        self.qualitaSonno = self.ddl[5]
         self._view.ddGender.disabled = True
         self._view.ddScreenTime.disabled = True
         self._view.ddPlatform.disabled = True
         self._view.ddAdInteraction.disabled = True
         self._view.ddIsolationLevel.disabled = True
         self._view.ddSleepQuality.disabled = True
+        self._view.result_list.controls.append(ft.Text("Potrebbe richiedere qualche secondo in base al numero di utenti"))
         t = time.time()
-        self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
+        nodi, archi = self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
         s = time.time()
-        print("tempo importazione utenti: " + str(s-t))
+        print("tempo importazione utenti e creazione grafo: " + str(s-t))
         self._view.result_list.controls.append(ft.Text(f"Importazione utenti effettuata correttamente!\n"
-                                                       f"importati: {len(self._model.utenti)} utenti"))
-        #self.attivitaFisica()
-        self._view.update_page()
-    def attivitaFisica(self):
-        listaOre = []
-        listaOreSocial = []
-        for u in self._model.utenti:
-            listaOre.append(u.Physical_activity_Hours)
-            #listaOreSocial.append(u.Daily_Social_Media_Hours)
-            # self._view.result_list.controls.append(ft.Text(u.User_ID))
-        contatore = Counter(listaOre)
-        print(contatore)
-        lutenti = self._model.utenti
-        for numero, conteggio in sorted(contatore.items(), key=lambda x: x[1], reverse=True):
-            percent = conteggio / len(lutenti) * 100
-            self._view.result_list.controls.append(ft.Text(f"Si allenano per {numero} ore --> {percent:.2f}% degli utenti"))
-        avg = self._model.calcola_media(listaOre)
-        self._view.result_list.controls.append(
-            ft.Text(f"Gli utenti di questo cluster in media si esercitano {avg:.2f} ore al giorno"))
+                                                       f"Nodi ==> Numero utenti importati: {nodi}\n"
+                                                       f"Archi ==> Numero collegamenti tra gli utenti: {archi}",size=15,color="grey"))
         self._view.update_page()
 
     def trovaTester(self,e):
         if not self._view.ddPlatform.disabled:
             self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+            return
         if self._view.ddPlatform.value == "Non specificata" or self._view.ddPlatform.value == "":
             self._view.create_alert("Inserire una piattaforma tramite il dropdown!")
             return
-        nodi, archi, list = self._model.cercaTester()
+        conto = 0
+        for v in self.ddl:
+            if v == "" or v is None or "Non specificat" in v:
+                conto += 1
+            if conto > 2:
+                self._view.create_alert("Seleziona almeno 4 valori di filtraggio perfavore.\n"
+                                        "Il database è troppo grosso!")
+                return
+        dim = len(self._model.utenti)
+        if dim >= 5:
+            if dim > 120:
+                self._view.result_list.controls.append(ft.Text("La ricorsione potrebbe necessitare tempo proporzionale al numero di utenti importati."))
+                self._view.update_page()
+            list = self._model.cercaTester()
+        else:
+            list = [n for n in self._model.mappaUtenti.keys()]
+
         provider = self._view.ddPlatform.value
-        self._view.result_list.controls.append(ft.Text(f"nodi: {nodi}\n"
-                                                       f"archi: {archi}\n"
-                                                       f"Lista tester per {provider}"))
+        self._view.result_list.controls.append(ft.Text(f"Lista tester per {provider}",size=10,color="orange"))
         n = 0
         for l in list:
             i = self._model.mappaUtenti[l]
@@ -96,8 +90,15 @@ class Controller:
         self._view.update_page()
     def reset_click(self,e):
         self._model.utenti = []
+        self._model.mappaUtenti.clear()
+        self._model.livelli.clear()
+        self._model.maxScore = -1
+        self._model.mappaPercentualiEd.clear()
+        self._model.mappaPercentualiFd.clear()
+        self._model.mappaPercentualiSi.clear()
+        self._model.mappaPercentualiEp.clear()
         self._model.grafo.clear()
-        print(self._view.ddPlatform.value + "bbb")
+
         if self._view.ddGender:
             self._view.ddGender.value = None
             self._view.ddGender.disabled = False
@@ -118,47 +119,100 @@ class Controller:
             self._view.ddSleepQuality.disabled = False
         self._view.update_page()
 
-    def percentage_click(self,e):
-        self._model.percentuali()
-        n = 1
-        self._view.result_list.controls.append(ft.Text(f"Tempo giornaliero in percentuale degli utenti"))
-        for u in self._model.mappaPercentuali.keys():
-            a,b,c = self._model.mappaPercentuali[u]
-            self._view.result_list.controls.append(ft.Text(f"{n}) ID: {u} --> Allenamento: {a:.2f}%, Lavoro/Studio: {b:.2f}%, Sonno: {c:.2f}%"))
-            n +=1
-        self._view.update_page()
+    def benessereDigitale_click(self,e):
+        if not self._view.ddPlatform.disabled:
+            self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+            return
+
+        utenti_top10,utenti_bottom10 = self._model.calcola_equilibrio_digitale()
+
+        self._view.result_list.controls.append(ft.Text("🔝 Top 10 utenti con miglior equilibrio digitale:",size=15,color="green"))
+        for user_id, score in utenti_top10:
+            percentuali = self._model.mappaPercentualiEd[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Attività: {percentuali[0]:.1f}%, "
+                        f"Studio: {percentuali[1]:.1f}%, Sonno: {percentuali[2]:.1f}%, Schermo: {percentuali[3]:.1f}%"))
+
+        self._view.result_list.controls.append(ft.Text("\n⚠️ Bottom 10 utenti con peggior equilibrio digitale:",size=15,color="red"))
+        for user_id, score in utenti_bottom10:
+            percentuali = self._model.mappaPercentualiEd[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Attività: {percentuali[0]:.1f}%, "
+                        f"Studio: {percentuali[1]:.1f}%, Sonno: {percentuali[2]:.1f}%, Schermo: {percentuali[3]:.1f}%"))
+
+        self._view.update_page()  # Aggiorna la UI per mostrare i nuovi dati
+
+    def faticaDigitale_click(self,e):
+        if not self._view.ddPlatform.disabled:
+            self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+            return
+
+        utenti_top10, utenti_bottom10 = self._model.calcola_fatica_digitale()
+
+        self._view.result_list.controls.append(ft.Text("⚠️ Top 10 utenti con maggiore fatica digitale:",size=15,color="red"))
+        for user_id, score in utenti_top10:
+            percentuali = self._model.mappaPercentualiFd[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Notifiche: {percentuali[0]}, "
+                        f"Tempo in Community: {percentuali[1]}h, Livello Fatica Social: {percentuali[2]}, Qualità del sonno : {percentuali[3]}"))
+
+        self._view.result_list.controls.append(ft.Text("\n🔝 Bottom 10 utenti con minor fatica digitale:",size=15,color="green"))
+        for user_id, score in utenti_bottom10:
+            percentuali = self._model.mappaPercentualiFd[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Notifiche: {percentuali[0]}, "
+                        f"Tempo in Community: {percentuali[1]}h, Livello Fatica Social: {percentuali[2]}, Qualità del sonno: {percentuali[3]}"))
+
+        self._view.update_page()  # Aggiorna la UI per mostrare i nuovi dati
+
+    def spesaIntrattenimento_click(self,e):
+        if not self._view.ddPlatform.disabled:
+            self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+            return
+
+        utenti_top10, utenti_bottom10 = self._model.calcola_spesa_intrattenimento()
+
+        self._view.result_list.controls.append(ft.Text("🔝 Top 10 utenti con maggiore spesa sull’intrattenimento:",size=15,color="green"))
+        for user_id, score in utenti_top10:
+            spesa, piattaforme, piattaforma_preferita = self._model.mappaPercentualiSi[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Spesa: ${spesa:.2f}, "
+                        f"Iscrizione a Piattaforme: {piattaforme}, Preferenza: {piattaforma_preferita}"))
+
+        self._view.result_list.controls.append(ft.Text("\n⚠️ Bottom 10 utenti con minore spesa sull’intrattenimento:",size=15,color="red"))
+        for user_id, score in utenti_bottom10:
+            spesa, piattaforme, piattaforma_preferita = self._model.mappaPercentualiSi[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Spesa: ${spesa:.2f}, "
+                        f"Iscrizione a Piattaforme: {piattaforme}, Preferenza: {piattaforma_preferita}"))
+
+        self._view.update_page()  # Aggiorna la UI per mostrare i nuovi dati
+
+    def esposizioneAds_click(self,e):
+        if not self._view.ddPlatform.disabled:
+            self._view.create_alert("Devi effettuare l'analisi prima di poter procedere con le operazioni!")
+            return
+
+        utenti_top10, utenti_bottom10 = self._model.calcola_esposizione_ads()
+
+        self._view.result_list.controls.append(ft.Text("🔝 Top 10 utenti più esposti ai contenuti pubblicitari:",size=15,color="green"))
+        for user_id, score in utenti_top10:
+            ad_interactions, screen_hours, notifications = self._model.mappaPercentualiEp[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Ads: {ad_interactions}, "
+                        f"Schermo: {screen_hours:.1f} h, Notifiche: {notifications}"))
+
+        self._view.result_list.controls.append(ft.Text("\n⚠️ Bottom 10 utenti meno esposti ai contenuti pubblicitari:",size=15,color="red"))
+        for user_id, score in utenti_bottom10:
+            ad_interactions, screen_hours, notifications = self._model.mappaPercentualiEp[user_id]
+            self._view.result_list.controls.append(
+                ft.Text(f"User {user_id}: Indice {score:.2f} | Ads: {ad_interactions}, "
+                        f"Schermo: {screen_hours:.1f} h, Notifiche: {notifications}"))
+
+        self._view.update_page()  # Aggiorna la UI per mostrare i nuovi dati
 
 
-    def stats_click(self,e):
-        self._view.result_list.controls.append(ft.Text(f"Statistiche degli utenti"))
-        paAvg, paMax, paMin, paDevStd, wsAvg, wsMax, wsMin, wsDevStd, sAvg, sMax, sMin, sDevStd = self._model.statistiche()
-        self._view.result_list.controls.append(ft.Text(f"Attività fisica:\n"
-                                                       f"media: {paAvg:.2f}, massimo: {paMax:.2f}, minimo: {paMin:.2f}, deviazione standard: {paDevStd:.2f}"))
-        self._view.result_list.controls.append(ft.Text(f"Lavoro/Studio:\n"
-                                                       f"media: {wsAvg:.2f}, massimo: {wsMax:.2f}, minimo: {wsMin:.2f}, deviazione standard: {wsDevStd:.2f}"))
-        self._view.result_list.controls.append(ft.Text(f"Sonno:\n"
-                                                       f"media: {sAvg:.2f}, massimo: {sMax:.2f}, minimo: {sMin:.2f}, deviazione standard: {sDevStd:.2f}"))
-        self._view.update_page()
 
 
-
-        """    def generate_chart(self, activity):
-             data = self._model.get_activity_data(activity)
-             names = list(data.keys())
-             values = list(data.values())
-
-             plt.figure(figsize=(7, 3))
-             plt.scatter(names, values, color="blue", s=0)  # Grafico a punti
-             plt.xlabel("Persone")
-             plt.ylabel("Ore spese")
-             plt.title(f"Ore spese in {activity}")
-
-             # Convertire il grafico in immagine base64
-             img = BytesIO()
-             plt.savefig(img, format="png")
-             img.seek(0)
-             plt.close()
-
-             return base64.b64encode(img.getvalue()).decode()"""
 
 
