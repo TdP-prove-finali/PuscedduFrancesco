@@ -5,7 +5,7 @@ class View(ft.UserControl):
     def __init__(self, page: ft.Page):
         super().__init__()
         self._page = page
-        self._page.title = "Diagnostica Medica"
+        self._page.title = "Interazioni Social"
         self._page.horizontal_alignment = ft.MainAxisAlignment.CENTER
         self._page.theme_mode = ft.ThemeMode.LIGHT
         self.image_display = ft.Image()
