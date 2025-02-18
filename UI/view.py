@@ -102,7 +102,7 @@ class View(ft.UserControl):
 
         # Pulsante per eseguire l'analisi
         self.btn_analyze = ft.ElevatedButton(
-            text="Analizza dati e crea Grafo", on_click=self.controller.analyze_click, color="green"
+            text="Analizza dati", on_click=self.controller.analyze_click, color="green"
         )
 
         # Pulsante per eseguire cancellare la view
@@ -117,7 +117,7 @@ class View(ft.UserControl):
 
         # Pulsante per iniziare la ricorsione
         self.btn_lookFor = ft.ElevatedButton(
-            text="Cerca Tester", on_click=self.controller.trovaTester, color="orange"
+            text="Crea grafo e cerca Tester", on_click=self.controller.trovaTester, color="orange"
         )
 
 

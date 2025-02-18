@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="Codice finito, manca solo il tutorial come installare l'applicazione" />
+    <list default="true" id="e3c7d426-a9bb-4130-942f-af65c9f0b7fa" name="Changes" comment="Codice finito.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MODEL/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/MODEL/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/view.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/view.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -286,6 +291,7 @@
     <MESSAGE value="commit 9/02, ricorsione(?), statistiche create!" />
     <MESSAGE value="commit 13/02, ricorsione(?), statistiche create!" />
     <MESSAGE value="Codice finito, manca solo il tutorial come installare l'applicazione" />
-    <option name="LAST_COMMIT_MESSAGE" value="Codice finito, manca solo il tutorial come installare l'applicazione" />
+    <MESSAGE value="Codice finito." />
+    <option name="LAST_COMMIT_MESSAGE" value="Codice finito." />
   </component>
 </project>

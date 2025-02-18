@@ -69,9 +69,6 @@ class Model:
 
         self.utenti = DAO.getUtenti(query, params)
         self.creaMappe()
-        nodi = self.grafo.number_of_nodes()
-        archi = self.grafo.number_of_edges()
-        return nodi, archi
     def creaMappe(self):
         for u in self.utenti:
             # Dizionario per raggruppare TUTTI gli utenti
@@ -85,11 +82,6 @@ class Model:
             if livello not in self.livelli:
                 self.livelli[livello] = []
             self.livelli[livello].append(u.User_ID)
-
-        if len(self.utenti) < 30:
-            self.creaGrafoPiccolo()
-        else:
-            self.creaGrafo()
 
     def creaGrafoPiccolo(self):
         nodes = list(self.mappaUtenti.keys())
@@ -111,31 +103,28 @@ class Model:
         s = time.time()
         print("tempo creazione archi: " + str(s-t))
 
-    # Un provider di servizi (twitter, facebook ecc...) vuole introdurre nuove features
-    # e quindi trovare una decina di persone adeguate al testing e quindi:
-    # massimizza il daily social media hours
-    # diversifica il più possibile le caratteristiche di queste persone
-    # Ad esempio Salario, occupazione, età, paese #
     def cercaTester(self):
         if len(self.utenti) < 30:
+            self.creaGrafoPiccolo()
             for nodo in self.mappaUtenti.keys():
                 self.ricorsione([nodo], nodo,[nodo],0)
         else:
+            self.creaGrafo()
             for nodo in self.livelli[1]:  # Partiamo dai nodi del livello 1
                 self.ricorsione([nodo], nodo, [nodo], 0)  # Ogni chiamata ha una lista separata
         return self.grafo.number_of_nodes(), self.grafo.number_of_edges(), self.bestSol
 
     def ricorsione(self, parziale, nodoAttuale, nodiVisitati, diversityScore):
-        #(parziale)
-        #print("---------------------------------------")
+        print(parziale)
+        print("---------------------------------------")
 
         if len(parziale) == 5:  # Se abbiamo raggiunto il numero massimo di nodi
             if diversityScore > self.maxScore:  # Aggiorna solo se il punteggio è migliore
                 self.bestSol = list(parziale)
                 self.maxScore = diversityScore
-                print(self.bestSol)
-                print(f"score: + {self.maxScore:.2f}")
-                print("---------------------------------------")
+                #print(self.bestSol)
+                #print(f"score: + {self.maxScore:.2f}")
+                #print("---------------------------------------")
             return  # Termina la funzione
 
         vicini = list(self.grafo.neighbors(nodoAttuale))  # Nodi adiacenti al nodo attuale
@@ -186,8 +175,7 @@ class Model:
         return diff/avg
         # casi estremi: sono uguali --> diff = 0 ==> indice = 0
         # sono uno il doppio dell'altro --> diff = avg ==> indice = 1
-
-    # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
+        # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
 
     def calcola_equilibrio_digitale(self):
         equilibrio_digitale = {}

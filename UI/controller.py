@@ -26,8 +26,8 @@ class Controller:
         for v in self.ddl:
             if v == "" or v is None or "Non specificat" in v:
                 conto += 1
-            if conto > 4:
-                self._view.create_alert("Selezionare almeno 2 valori di filtraggio perfavore")
+            if conto > 5:
+                self._view.create_alert("Selezionare almeno 1 valore di filtraggio perfavore")
                 return
         self.genere = self.ddl[0]
         self.tempoSchermi = self.ddl[1]
@@ -41,14 +41,12 @@ class Controller:
         self._view.ddAdInteraction.disabled = True
         self._view.ddIsolationLevel.disabled = True
         self._view.ddSleepQuality.disabled = True
-        self._view.result_list.controls.append(ft.Text("Potrebbe richiedere qualche secondo in base al numero di utenti"))
         t = time.time()
-        nodi, archi = self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
+        self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
         s = time.time()
         print("tempo importazione utenti e creazione grafo: " + str(s-t))
         self._view.result_list.controls.append(ft.Text(f"Importazione utenti effettuata correttamente!\n"
-                                                       f"Nodi ==> Numero utenti importati: {nodi}\n"
-                                                       f"Archi ==> Numero collegamenti tra gli utenti: {archi}",size=15,color="grey"))
+                                                       f"Numero utenti importati: {len(self._model.utenti)}\n",size=15))
         self._view.update_page()
 
     def trovaTester(self,e):
@@ -62,8 +60,8 @@ class Controller:
         for v in self.ddl:
             if v == "" or v is None or "Non specificat" in v:
                 conto += 1
-            if conto > 2:
-                self._view.create_alert("Seleziona almeno 4 valori di filtraggio perfavore.\n"
+            if conto > 1:
+                self._view.create_alert("Seleziona almeno 5 valori di filtraggio perfavore.\n"
                                         "Il database è troppo grosso!")
                 return
         dim = len(self._model.utenti)
@@ -71,12 +69,15 @@ class Controller:
             if dim > 120:
                 self._view.result_list.controls.append(ft.Text("La ricorsione potrebbe necessitare tempo proporzionale al numero di utenti importati."))
                 self._view.update_page()
-            list = self._model.cercaTester()
+            nodi, archi, list = self._model.cercaTester()
         else:
             list = [n for n in self._model.mappaUtenti.keys()]
 
         provider = self._view.ddPlatform.value
-        self._view.result_list.controls.append(ft.Text(f"Lista tester per {provider}",size=10,color="orange"))
+
+        self._view.result_list.controls.append(ft.Text(f"Numero nodi: {nodi}\n"
+                                                       f"Numero archi: {archi}\n"
+                                                       f"Lista tester per {provider}",size=15,color="orange"))
         n = 0
         for l in list:
             i = self._model.mappaUtenti[l]
