@@ -23,7 +23,7 @@ class View(ft.UserControl):
         self.lookFor = None
 
     def load_interface(self):
-        self._title = ft.Text("Interazioni Social", color="blue", size=24)
+        self._title = ft.Text("Social Entertainment", color="blue", size=24)
         self._page.controls.append(ft.Container(content=self._title, alignment=ft.alignment.center))
 
 
