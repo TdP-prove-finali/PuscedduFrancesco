@@ -94,7 +94,7 @@ class View(ft.UserControl):
 
         # Seconda riga del layout
         row2 = ft.Row(
-            [self.ddScreenTime, self.ddAdInteraction, self.ddIsolationLevel], # self.ddIsolationLevel
+            [self.ddScreenTime, self.ddAdInteraction, self.ddIsolationLevel],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10
         )
@@ -169,27 +169,6 @@ class View(ft.UserControl):
 
     def set_controller(self, controller):
         self._controller = controller
-
-    def change_btn(self,e):
-        selected_platform = self.ddPlatform.value
-
-        # Se selezioni "Non specificata", lascia il testo base e disabilita il pulsante
-        if selected_platform is None:
-            self.btn_lookFor.text = "Cerca Tester"
-            self.btn_lookFor.disabled = True
-        else:
-            self.btn_lookFor.text = f"Cerca Tester per {selected_platform}"
-            self.btn_lookFor.disabled = False
-
-        self.update_page()  # Aggiorna la UI"""
-
-
-    """def update_chart(self, e):
-        activity = e.control.data
-        img_data = self.controller.generate_chart(activity)
-        self._page.controls.append(ft.Container(content=self.image_display, alignment=ft.alignment.center))
-        self.image_display.src_base64 = img_data
-        self.update_page()"""
 
     def create_alert(self, message):
         """Mostra un alert"""

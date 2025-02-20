@@ -44,7 +44,7 @@ class Controller:
         t = time.time()
         self._model.importaUtenti(self.genere,self.tempoSchermi,self.piattaforma,self.livelloIsolamento,self.interazionePubblicitaria,self.qualitaSonno)
         s = time.time()
-        print("tempo importazione utenti e creazione grafo: " + str(s-t))
+        print("tempo importazione utenti: " + str(s-t))
         self._view.result_list.controls.append(ft.Text(f"Importazione utenti effettuata correttamente!\n"
                                                        f"Numero utenti importati: {len(self._model.utenti)}\n",size=15))
         self._view.update_page()
@@ -69,7 +69,10 @@ class Controller:
             if dim > 120:
                 self._view.result_list.controls.append(ft.Text("La ricorsione potrebbe necessitare tempo proporzionale al numero di utenti importati."))
                 self._view.update_page()
+            s = time.time()
             nodi, archi, list = self._model.cercaTester()
+            t = time.time()
+            print(f"Tempo impiegato per la ricorsione: {t-s}")
         else:
             list = [n for n in self._model.mappaUtenti.keys()]
 

@@ -1,4 +1,3 @@
-import statistics
 import time
 
 from database.DAO import DAO
@@ -159,7 +158,8 @@ class Model:
                 punteggio += 1
             if self.mappaUtenti[u].occupation != self.mappaUtenti[last].occupation:
                 punteggio += 1
-            punteggio += self.indiceDiversita(self.mappaUtenti[u].Monthly_Income_USD, self.mappaUtenti[last].Monthly_Income_USD)
+            salarioUltimo = self.mappaUtenti[last].Monthly_Income_USD
+            punteggio += self.indiceDiversita(self.mappaUtenti[u].Monthly_Income_USD, salarioUltimo)
             punteggio += self.indiceDiversita(self.mappaUtenti[u].age, self.mappaUtenti[last].age)
         return punteggio
     def indiceDiversita(self,v1,v2):
@@ -175,7 +175,7 @@ class Model:
         return diff/avg
         # casi estremi: sono uguali --> diff = 0 ==> indice = 0
         # sono uno il doppio dell'altro --> diff = avg ==> indice = 1
-        # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33, pertanto mi sembra buono
+        # Ho fatto le prove e il massimo valore di differenza di stipendio è circa 1.8, invece per l'età è 1.33
 
     def calcola_equilibrio_digitale(self):
         equilibrio_digitale = {}
