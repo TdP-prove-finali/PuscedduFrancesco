@@ -43,4 +43,4 @@ class Utente:
     Social_Isolation_Feeling: int
     Monthly_Expenditure_on_Entertainment_USD: float
     # Social Media Fatigue level, tech savviness level, sleep quality, social isolation feeling
-    # Are all classified on a scale from 1 to 10 --> (scale 1-10)#
+    # sono tutti classificati su una scala da 1 a 10 --> (scale 1-10)#
